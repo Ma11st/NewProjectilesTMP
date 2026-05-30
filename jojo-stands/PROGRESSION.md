@@ -151,14 +151,16 @@ control — so we can tune the "feel" without code changes.
 
 ---
 
-## 5. Who else has Stands — enemy users (next code pass)
+## 5. Who else has Stands — enemy users (implemented)
 
-- The current `JJB_StandController` is a **single player-bound quest**. Enemy users require
-  generalizing it to a **per-actor instance** (host the controller state on the bond
-  magic-effect instead of one singleton), plus combat-AI hooks that decide when an NPC
-  barrages/guards. This is the **refactor you green-lit for the next pass.**
-- Each enemy user gets their own Resolve, their own StandDef, their own Mastery (fixed by the
-  encounter design). Defeating them can drop Arrows and advance Conviction/Trials.
+- **Done:** the old singleton `JJB_StandController` is gone. Per-actor state now lives on
+  **`JJB_StandBondEffect`** (an ActiveMagicEffect), so any actor carrying the bond ability
+  gets its own Stand, Resolve, and state machine. An NPC ability variant just sets the
+  effect's `DefOverride` to that NPC's Stand; the effect runs a simple combat-AI loop
+  (`NpcThink`) that barrages in close range and parries reactively via a hit sensor.
+- Each enemy user gets their own Resolve pool, their own StandDef, and their own Mastery
+  (fixed per encounter via the def's `NpcPrecision/NpcFerocity`). Defeating them can drop
+  Arrows and advance Conviction/Trials.
 
 ---
 
@@ -185,14 +187,22 @@ perceive" without per-viewer rendering.
 
 ---
 
-## 7. What gets built next (proposed order)
+## 7. Build status
 
-1. **Per-actor controller refactor** (unblocks enemy users + multiple Stands).
-2. **Mastery + Conviction** globals/tracks + `GrantBreakthrough` + `JJB_Trials` watcher.
-3. **StandDefs schema** for `capabilities` / `mastery` / `evolution` (data shape landing in
-   this pass — see updated `data/StandDefs.json`).
-4. **Assignment**: `JJB_SoulProfile` counters + awakening dialogue + mapping.
-5. **Acquisition**: awakening quest hooks + Arrow item (survival check) + Requiem ritual.
-6. **Visibility**: `JJB_StandSight` keyword + aggressor-rerouting + optional aura.
+**Implemented in Papyrus (this pass):**
+1. ✅ **Per-actor refactor** (`JJB_StandBondEffect`) — unblocks enemy users + multiple Stands.
+2. ✅ **Resolve / Mastery / Conviction** (`JJB_StandManager`) + `GrantBreakthrough` + `JJB_Trials`.
+3. ✅ **StandDef schema** (`capabilities` / mastery deltas / evolution) on `JJB_StandDef` +
+   `data/StandDefs.json` v2.
+4. ✅ **Assignment**: `JJB_SoulProfile` counters + awakening-dialogue scoring + archetype map.
+5. ✅ **Acquisition hooks**: `Manager.AwakenPlayer()` + `Manager.TryRequiemRitual()` (the Arrow
+   item/quest + survival check is CK work — see `ck-setup/FORMS.md` §6).
+6. ◑ **Visibility**: `StandSightKeyword` plumbed; the perception/aggressor-reroute behavior is
+   finished in the CK (keyword on ghost ActorBases + AI), plus the optional aura.
+
+**Still ahead:**
+- The **CK build** (`JoJoStands.esp`): def quests, abilities, ghost actors, dialogue, Arrow item.
+- **ACT** form-switching flow (engine-supported via `NextActDef`, unwired for the SC roster).
+- The World **time-stop**; ghost attack animations; an MCM.
 
 ACTs stay built-but-unwired until later Parts are greenlit. Roster stays SC/OVA-only.

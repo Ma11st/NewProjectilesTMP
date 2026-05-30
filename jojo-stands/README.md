@@ -26,7 +26,7 @@ FormID — every game form is a script property you fill in the CK.
 One barrage keypress does **not** script dozens of punches. Instead:
 
 ```
-hold Q ──► JJB_StandController.BarrageStart()
+hold Q ──► JJB_StandBondEffect.BarrageStart()   (the player's per-actor brain)
               │  manifest the Stand (flicker in)
               │  every 0.12s, while Resolve lasts:
               ▼
@@ -49,9 +49,15 @@ Papyrus only owns the *when* (the manifestation window + Resolve).
 
 | Script | Role |
 |--------|------|
-| `JJB_StandController` (Quest) | The brain. Owns the Stand actor, the four action windows, Resolve. The rules live here. |
-| `JJB_StandBondEffect` (ActiveMagicEffect) | Input layer on the player: barrage/stance/reach keys + Resolve regen. Requires SKSE. |
-| `JJB_PlayerHitSensor` (ReferenceAlias) | Watches incoming hits → asks the controller for a reflexive save. |
+| `JJB_StandBondEffect` (ActiveMagicEffect) | **The per-actor brain.** Carried on a bond ability, so the player *and* enemy NPCs each get their own Stand, Resolve, and state machine. Owns the four action windows + manifestation + capability gating. Player = key input; NPC = simple combat AI. |
+| `JJB_StandDef` (Quest, one per Stand) | Static data for a Stand: capabilities, forms, mastery/evolution. Runtime mirror of a `data/StandDefs.json` entry. |
+| `JJB_StandManager` (Quest, singleton) | Global tuning, the def registry, the player's Conviction/Mastery, and awakening. |
+| `JJB_PlayerHitSensor` (ReferenceAlias) | Routes heavy incoming hits to the player's bond effect for a Reflex save. |
+| `JJB_SoulProfile` (ReferenceAlias) | Playstyle + awakening-dialogue scoring → archetype → which Stand you get. |
+| `JJB_Trials` (ReferenceAlias) | Turns bravery moments (clutch survival, outnumbered) into Conviction. |
+
+> **Per-actor refactor:** the old singleton `JJB_StandController` is gone — its logic now
+> lives on `JJB_StandBondEffect` so any actor can be a Stand user. See `PROGRESSION.md` §5.
 
 ## Controls (defaults, rebindable in the CK / a future MCM)
 
@@ -75,7 +81,9 @@ Papyrus only owns the *when* (the manifestation window + Resolve).
 - ✅ Star Platinum barrage + Hierophant Green ranged volley (NewProjectiles JSON, schema-valid).
 - ✅ Data-driven registry + capability/mastery/evolution schema (`data/StandDefs.json`).
 - ✅ RPG layer **designed** (`PROGRESSION.md`): acquisition, growth, evolution, assignment, visibility.
-- ⬜ RPG layer **implemented**: per-actor controller refactor, Mastery/Conviction, soul-profile assignment, Arrow/Requiem, visibility keyword.
+- ✅ RPG layer **implemented (Papyrus)**: per-actor refactor (enemy users possible), Resolve/Mastery/Conviction, capability gating, soul-profile assignment + awakening, Trials → breakthroughs, Requiem ritual hook.
+- ⬜ CK build of `JoJoStands.esp` (def quests, abilities, ghost actors, dialogue, Arrow item) — see `ck-setup/FORMS.md`.
+- ⬜ ACT form-switching UI/flow (engine supported, unwired for the SC roster).
 - ⬜ The World **time-stop** (designed, shipped disabled).
 - ⬜ Behavior-graph attack animations for the ghost (you supply / remap anim events).
 - ⬜ MCM for live tuning.
