@@ -1,0 +1,108 @@
+{
+  "FormIDs": {
+    "key_barrageSpell": "JoJoStands.esp|0x000D62",
+    "key_punchProj": "JoJoStands.esp|0x000D63",
+    "key_punchSpell": "JoJoStands.esp|0x000D64"
+  },
+  "HomingData": {
+    "key_H_punch": {
+      "type": "ConstSpeed",
+      "rotationTime": 0.5,
+      "target": "Nearest",
+      "aggressive": "Hostile",
+      "checkLOS": true
+    }
+  },
+  "MulticastSpawnGroups": {
+    "key_SG_fist": {
+      "Pattern": {
+        "Figure": {
+          "shape": "FillCircle",
+          "count": 5,
+          "size": 45
+        },
+        "normal": [
+          0,
+          0.01,
+          1
+        ],
+        "xDepends": false,
+        "origin": "NPC R Hand [RHnd]",
+        "posOffset": [
+          0,
+          60,
+          0
+        ]
+      },
+      "rotation": "ToSight",
+      "sound": "None",
+      "rotRnd": [
+        6,
+        6
+      ],
+      "posRnd": [
+        12,
+        12,
+        12
+      ]
+    }
+  },
+  "MulticastData": {
+    "key_MC_punch": [
+      {
+        "spawn_group": "key_SG_fist",
+        "spellID": "key_punchSpell",
+        "callTriggers": true,
+        "HomingDetection": "Evenly"
+      }
+    ]
+  },
+  "Triggers": [
+    {
+      "event": "Cast",
+      "conditions": [
+        {
+          "type": "CasterIsFormID",
+          "formID": "0x14"
+        },
+        {
+          "type": "SpellIsFormID",
+          "formID": "key_barrageSpell"
+        }
+      ],
+      "TriggerFunctions": {
+        "functions": [
+          {
+            "type": "ApplyMultiCast",
+            "id": "key_MC_punch"
+          }
+        ],
+        "disableOrigin": true
+      }
+    },
+    {
+      "event": "ProjAppeared",
+      "conditions": [
+        {
+          "type": "ProjBaseIsFormID",
+          "formID": "key_punchProj"
+        }
+      ],
+      "TriggerFunctions": {
+        "functions": [
+          {
+            "type": "SetHoming",
+            "id": "key_H_punch"
+          },
+          {
+            "type": "ChangeRange",
+            "data": {
+              "type": "Set",
+              "value": 350
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

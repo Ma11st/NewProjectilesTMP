@@ -1,0 +1,10 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name": "cinematiccamera-ng",
+    "version-string": "2.0.0",
+    "description": "Cinematic camera / cutscene framework for Skyrim SE/AE/VR (CommonLibSSE-NG).",
+    "dependencies": [
+        "commonlibsse-ng",
+        "jsoncpp"
+    ]
+}

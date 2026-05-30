@@ -1,0 +1,66 @@
+{
+  "FormIDs": {
+    "key_fingerSpell": "JoJoStands.esp|0x000D69",
+    "key_fingerProj": "JoJoStands.esp|0x000D68"
+  },
+  "HomingData": {
+    "key_H_finger": {
+      "type": "ConstSpeed",
+      "rotationTime": 1.0,
+      "target": "Cursor",
+      "cursorAngle": 8,
+      "checkLOS": true
+    }
+  },
+  "MulticastSpawnGroups": {
+    "key_SG_finger": {
+      "Pattern": {
+        "Figure": {
+          "shape": "Single",
+          "count": 1
+        },
+        "normal": [0, 0.01, 1],
+        "xDepends": false,
+        "origin": "NPC R Hand [RHnd]",
+        "posOffset": [0, 40, 0]
+      },
+      "rotation": "ToSight",
+      "sound": "Single"
+    }
+  },
+  "MulticastData": {
+    "key_MC_finger": [
+      {
+        "spawn_group": "key_SG_finger",
+        "spellID": "key_fingerSpell",
+        "callTriggers": true
+      }
+    ]
+  },
+  "Triggers": [
+    {
+      "event": "Cast",
+      "conditions": [
+        { "type": "SpellIsFormID", "formID": "key_fingerSpell" }
+      ],
+      "TriggerFunctions": {
+        "functions": [
+          { "type": "ApplyMultiCast", "id": "key_MC_finger" }
+        ],
+        "disableOrigin": true
+      }
+    },
+    {
+      "event": "ProjAppeared",
+      "conditions": [
+        { "type": "ProjBaseIsFormID", "formID": "key_fingerProj" }
+      ],
+      "TriggerFunctions": {
+        "functions": [
+          { "type": "SetHoming", "id": "key_H_finger" },
+          { "type": "ChangeRange", "data": { "type": "Set", "value": 2000 } }
+        ]
+      }
+    }
+  ]
+}

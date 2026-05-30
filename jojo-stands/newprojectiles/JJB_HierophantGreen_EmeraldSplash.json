@@ -1,0 +1,96 @@
+{
+  "FormIDs": {
+    "key_splashSpell": "JoJoStands.esp|0x000D72",
+    "key_shardProj": "JoJoStands.esp|0x000D73",
+    "key_shardSpell": "JoJoStands.esp|0x000D74"
+  },
+  "HomingData": {
+    "key_H_shard": {
+      "type": "ConstAccel",
+      "acceleration": 40,
+      "target": "Cursor",
+      "cursorAngle": 14,
+      "checkLOS": false
+    }
+  },
+  "MulticastSpawnGroups": {
+    "key_SG_splash": {
+      "Pattern": {
+        "Figure": {
+          "shape": "FillHalfCircle",
+          "count": 12,
+          "size": 220
+        },
+        "planeRotate": 90,
+        "normal": [
+          0,
+          0.01,
+          1
+        ],
+        "origin": "NPC Spine2 [Spn2]",
+        "posOffset": [
+          0,
+          90,
+          20
+        ]
+      },
+      "rotation": "ToSight",
+      "sound": "Single",
+      "rotRnd": [
+        3,
+        3
+      ]
+    }
+  },
+  "MulticastData": {
+    "key_MC_splash": [
+      {
+        "spawn_group": "key_SG_splash",
+        "spellID": "key_shardSpell",
+        "callTriggers": true,
+        "HomingDetection": "Individual"
+      }
+    ]
+  },
+  "Triggers": [
+    {
+      "event": "Cast",
+      "conditions": [
+        {
+          "type": "CasterIsFormID",
+          "formID": "0x14"
+        },
+        {
+          "type": "SpellIsFormID",
+          "formID": "key_splashSpell"
+        }
+      ],
+      "TriggerFunctions": {
+        "functions": [
+          {
+            "type": "ApplyMultiCast",
+            "id": "key_MC_splash"
+          }
+        ],
+        "disableOrigin": true
+      }
+    },
+    {
+      "event": "ProjAppeared",
+      "conditions": [
+        {
+          "type": "ProjBaseIsFormID",
+          "formID": "key_shardProj"
+        }
+      ],
+      "TriggerFunctions": {
+        "functions": [
+          {
+            "type": "SetHoming",
+            "id": "key_H_shard"
+          }
+        ]
+      }
+    }
+  ]
+}
