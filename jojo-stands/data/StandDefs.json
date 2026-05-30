@@ -1,0 +1,55 @@
+{
+  "_README": "Per-Stand definitions. This is the framework's extension point: adding a Stand = one entry here + the Creation Kit forms it names (see ../ck-setup/FORMS.md). Only 'star_platinum' is fully wired in this beta; the rest are stubs to show the shape.",
+
+  "schemaVersion": 1,
+
+  "stands": {
+    "star_platinum": {
+      "displayName": "Star Platinum",
+      "range": "Melee",
+      "wired": true,
+      "barrageConfig": "newprojectiles/JJB_StarPlatinum_Barrage.json",
+      "forms": {
+        "barrageSpell":     "JoJoStands.esp|0x000D62",
+        "punchProjectile":  "JoJoStands.esp|0x000D63",
+        "punchSpell":       "JoJoStands.esp|0x000D64",
+        "guardCounterSpell":"JoJoStands.esp|0x000D65",
+        "reflexNegateSpell":"JoJoStands.esp|0x000D66",
+        "standActorBase":   "JoJoStands.esp|0x000D60"
+      },
+      "tuning": {
+        "reflexNegationFrac": 0.5,
+        "barrageMaxDuration": 3.0
+      }
+    },
+
+    "the_world": {
+      "displayName": "The World",
+      "range": "Melee",
+      "wired": false,
+      "barrageConfig": "newprojectiles/JJB_StarPlatinum_Barrage.json",
+      "timeStop": {
+        "enabled": false,
+        "durationSeconds": 5.0,
+        "useCinematicCamera": true
+      },
+      "_todo": "Boss/NPC Stand. Time-stop is a stretch goal; ships disabled."
+    },
+
+    "hierophant_green": {
+      "displayName": "Hierophant Green",
+      "range": "Ranged",
+      "wired": false,
+      "barrageConfig": "newprojectiles/JJB_HierophantGreen_EmeraldSplash.json",
+      "_todo": "Ranged template. Emerald Splash volley is authored; needs CK forms."
+    },
+
+    "silver_chariot": {
+      "displayName": "Silver Chariot",
+      "range": "Melee",
+      "wired": false,
+      "barrageConfig": "newprojectiles/JJB_StarPlatinum_Barrage.json",
+      "_todo": "Rapier flurry = a tighter, faster variant of the fist barrage."
+    }
+  }
+}
