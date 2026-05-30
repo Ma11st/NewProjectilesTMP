@@ -15,6 +15,7 @@ FormID — every game form is a script property you fill in the CK.
 | Path | What it is |
 |------|------------|
 | [`DESIGN.md`](DESIGN.md) | The design bible: the "Flicker" state machine, the four action windows, the Resolve economy, the roster. **Read this first.** |
+| [`PROGRESSION.md`](PROGRESSION.md) | The RPG layer (design): acquisition (milestone + Arrow), the three growth layers (Resolve/Mastery/Conviction), the four evolution modes (Mastery/ACT/Requiem/sub-abilities), Stand assignment, enemy users, visibility, OVA guardrails. |
 | `scripts/source/*.psc` | Papyrus that implements the system. |
 | `newprojectiles/*.json` | Barrage / ranged volleys for the [NewProjectiles](../README.md) engine. Validated against the repo `schema.json`. |
 | `data/StandDefs.json` | Data-driven Stand registry (extension point). |
@@ -72,11 +73,13 @@ Papyrus only owns the *when* (the manifestation window + Resolve).
 
 - ✅ Flicker state machine, Resolve economy, barrage/guard/reflex windows (Papyrus).
 - ✅ Star Platinum barrage + Hierophant Green ranged volley (NewProjectiles JSON, schema-valid).
-- ✅ Data-driven registry + full CK checklist.
+- ✅ Data-driven registry + capability/mastery/evolution schema (`data/StandDefs.json`).
+- ✅ RPG layer **designed** (`PROGRESSION.md`): acquisition, growth, evolution, assignment, visibility.
+- ⬜ RPG layer **implemented**: per-actor controller refactor, Mastery/Conviction, soul-profile assignment, Arrow/Requiem, visibility keyword.
 - ⬜ The World **time-stop** (designed, shipped disabled).
 - ⬜ Behavior-graph attack animations for the ghost (you supply / remap anim events).
 - ⬜ MCM for live tuning.
-- ⬜ Multiple-Stand NPC users.
+- ⬜ Multiple-Stand NPC users (unblocked by the per-actor refactor).
 
 ## Building the playable mod
 

@@ -5,6 +5,10 @@
 > perform a specific action (a rush, a precise block, a catch, a reach) and then vanish.
 > This is modeled after the 1993/2000 **OVA** tone, not the later anime where Stands hover
 > beside their user indefinitely.
+>
+> **The RPG layer** — acquisition, progression, evolution (ACT/Requiem), enemy Stand users,
+> and who can see Stands — lives in its companion doc [`PROGRESSION.md`](PROGRESSION.md).
+> Roster is **Stardust Crusaders / OVA only** unless expanded deliberately.
 
 ---
 

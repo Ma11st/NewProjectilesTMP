@@ -1,55 +1,165 @@
 {
-  "_README": "Per-Stand definitions. This is the framework's extension point: adding a Stand = one entry here + the Creation Kit forms it names (see ../ck-setup/FORMS.md). Only 'star_platinum' is fully wired in this beta; the rest are stubs to show the shape.",
+  "_README": "Per-Stand definitions + the RPG schema (see ../PROGRESSION.md). This is the framework's extension point and the OVA guardrail: a Stand can only do what its 'capabilities' allow, and progresses only along the 'mastery'/'evolution' it declares. Adding a Stand = one entry here + the Creation Kit forms it names (../ck-setup/FORMS.md). Only 'star_platinum' is fully wired in the beta; the rest show the shape.",
 
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+
+  "_archetypeMap": {
+    "_doc": "Stand assignment (PROGRESSION.md S4): the JJB_SoulProfile counters + awakening dialogue produce one of these archetypes, which maps to eligible OVA/Stardust Crusaders Stands.",
+    "Power":   ["star_platinum", "the_world"],
+    "Finesse": ["hierophant_green", "silver_chariot"],
+    "Control": ["magicians_red"],
+    "Insight": ["hermit_purple"],
+    "assignment": { "mode": "deterministic", "tieBreaker": "dialogue" }
+  },
 
   "stands": {
     "star_platinum": {
       "displayName": "Star Platinum",
+      "archetype": "Power",
       "range": "Melee",
       "wired": true,
+
+      "capabilities": {
+        "barrage": true,
+        "guard": true,
+        "reach": true,
+        "ranged": false,
+        "timeStopBrief": false
+      },
+
       "barrageConfig": "newprojectiles/JJB_StarPlatinum_Barrage.json",
       "forms": {
-        "barrageSpell":     "JoJoStands.esp|0x000D62",
-        "punchProjectile":  "JoJoStands.esp|0x000D63",
-        "punchSpell":       "JoJoStands.esp|0x000D64",
-        "guardCounterSpell":"JoJoStands.esp|0x000D65",
-        "reflexNegateSpell":"JoJoStands.esp|0x000D66",
-        "standActorBase":   "JoJoStands.esp|0x000D60"
+        "barrageSpell":      "JoJoStands.esp|0x000D62",
+        "punchProjectile":   "JoJoStands.esp|0x000D63",
+        "punchSpell":        "JoJoStands.esp|0x000D64",
+        "guardCounterSpell": "JoJoStands.esp|0x000D65",
+        "reflexNegateSpell": "JoJoStands.esp|0x000D66",
+        "standActorBase":    "JoJoStands.esp|0x000D60"
       },
-      "tuning": {
-        "reflexNegationFrac": 0.5,
-        "barrageMaxDuration": 3.0
+
+      "mastery": {
+        "_doc": "Use-driven, improves APPLICATION (not raw power). XP from skillful use only.",
+        "tracks": [
+          {
+            "id": "precision",
+            "name": "Precision",
+            "improves": ["parryWindowSeconds", "reachRange"],
+            "milestones": [
+              { "at": 25, "effect": "parryWindowSeconds += 0.05" },
+              { "at": 60, "effect": "reachRange += 128" }
+            ]
+          },
+          {
+            "id": "ferocity",
+            "name": "Ferocity",
+            "improves": ["barrageTickInterval", "costBarragePerSec"],
+            "milestones": [
+              { "at": 40, "effect": "barrageTickInterval -= 0.02" },
+              { "at": 80, "effect": "costBarragePerSec -= 4" }
+            ]
+          }
+        ]
+      },
+
+      "evolution": {
+        "acts":    { "supported": false },
+        "requiem": { "supported": false },
+        "subAbilities": [
+          {
+            "id": "star_finger",
+            "name": "Star Finger",
+            "unlock": { "type": "mastery", "track": "precision", "min": 60 },
+            "_note": "Extends reach far beyond normal (the OVA finger gag)."
+          },
+          {
+            "id": "time_stop_brief",
+            "name": "Star Platinum: The World (brief)",
+            "unlock": { "type": "conviction", "min": 90, "alsoMasteryMin": 95 },
+            "grantsCapability": "timeStopBrief",
+            "_note": "Part-3 canon: SP gains a 1-2s time-stop at the climax. Endgame-rare."
+          }
+        ]
       }
     },
 
     "the_world": {
       "displayName": "The World",
+      "archetype": "Power",
       "range": "Melee",
       "wired": false,
+      "capabilities": { "barrage": true, "guard": true, "reach": false, "ranged": false, "timeStopBrief": true },
       "barrageConfig": "newprojectiles/JJB_StarPlatinum_Barrage.json",
-      "timeStop": {
-        "enabled": false,
-        "durationSeconds": 5.0,
-        "useCinematicCamera": true
+      "evolution": {
+        "acts": { "supported": false },
+        "requiem": { "supported": false },
+        "subAbilities": [
+          { "id": "time_stop_full", "name": "ZA WARUDO", "unlock": { "type": "story" },
+            "_note": "Full time-stop. DIO/boss Stand; ships disabled in beta (DESIGN.md S7)." }
+        ]
       },
       "_todo": "Boss/NPC Stand. Time-stop is a stretch goal; ships disabled."
     },
 
-    "hierophant_green": {
-      "displayName": "Hierophant Green",
-      "range": "Ranged",
-      "wired": false,
-      "barrageConfig": "newprojectiles/JJB_HierophantGreen_EmeraldSplash.json",
-      "_todo": "Ranged template. Emerald Splash volley is authored; needs CK forms."
-    },
-
     "silver_chariot": {
       "displayName": "Silver Chariot",
+      "archetype": "Finesse",
       "range": "Melee",
       "wired": false,
+      "capabilities": { "barrage": true, "guard": true, "reach": false, "ranged": false, "timeStopBrief": false },
       "barrageConfig": "newprojectiles/JJB_StarPlatinum_Barrage.json",
-      "_todo": "Rapier flurry = a tighter, faster variant of the fist barrage."
+      "evolution": {
+        "acts": { "supported": false },
+        "requiem": {
+          "supported": true,
+          "trigger": { "convictionMin": 95, "masteryMin": 90, "requiemArrow": true },
+          "variant": "silver_chariot_requiem"
+        },
+        "subAbilities": []
+      },
+      "_todo": "Rapier flurry = a tighter/faster variant of the fist barrage. Canon-appropriate Requiem example (Polnareff / Chariot Requiem)."
+    },
+
+    "silver_chariot_requiem": {
+      "displayName": "Chariot Requiem",
+      "archetype": "Finesse",
+      "range": "Melee",
+      "wired": false,
+      "isVariant": true,
+      "variantOf": "silver_chariot",
+      "capabilities": { "barrage": true, "guard": true, "reach": true, "ranged": false, "timeStopBrief": false },
+      "evolution": { "acts": { "supported": false }, "requiem": { "supported": false }, "subAbilities": [] },
+      "_todo": "Requiem form: drastically stronger + one signature ultimate tailored to the user's deepest desire (PROGRESSION.md S3.3)."
+    },
+
+    "hierophant_green": {
+      "displayName": "Hierophant Green",
+      "archetype": "Finesse",
+      "range": "Ranged",
+      "wired": false,
+      "capabilities": { "barrage": false, "guard": true, "reach": true, "ranged": true, "timeStopBrief": false },
+      "barrageConfig": "newprojectiles/JJB_HierophantGreen_EmeraldSplash.json",
+      "evolution": { "acts": { "supported": false }, "requiem": { "supported": false }, "subAbilities": [
+        { "id": "emerald_splash", "name": "Emerald Splash", "unlock": { "type": "default" } }
+      ] },
+      "_todo": "Ranged template. Emerald Splash volley is authored; needs CK forms. Cannot barrage (capability gate)."
+    },
+
+    "magicians_red": {
+      "displayName": "Magician's Red",
+      "archetype": "Control",
+      "range": "Ranged",
+      "wired": false,
+      "capabilities": { "barrage": false, "guard": true, "reach": false, "ranged": true, "timeStopBrief": false },
+      "_todo": "Fire control / Crossfire Hurricane. Ranged volley TODO."
+    },
+
+    "hermit_purple": {
+      "displayName": "Hermit Purple",
+      "archetype": "Insight",
+      "range": "Utility",
+      "wired": false,
+      "capabilities": { "barrage": false, "guard": false, "reach": true, "ranged": false, "timeStopBrief": false },
+      "_todo": "Divination/utility Stand. Mostly non-combat; drives detection/exploration perks."
     }
   }
 }
