@@ -71,17 +71,29 @@ Create `JJB_StandManager` (Start Game Enabled) with the **`JJB_StandManager`** s
 
 All three go on a **player** ReferenceAlias (you can stack scripts on one alias).
 
-## 6. Acquisition wiring
-- **Awakening (milestone):** at the right quest stage, run the awakening scene, then call
-  `(JJB_SoulProfile alias).RunAwakening()`. It resolves the archetype and calls
-  `Manager.AwakenPlayer()`, which sets `PlayerDef` and adds `StandBondAbility`.
-- **Awakening dialogue ("personality test"):** each answer's script fragment calls
-  `(SoulProfile).AddArchetypePoints(archetype, amount)` before `RunAwakening()`.
-- **The Arrow (item):** a MiscObject/quest that, on use, runs a survival check gated by
-  `Conviction` (low Conviction → likely death). On success, route to awakening (latent
-  user) **or** to `Manager.TryRequiemRitual()` if the user already has a Stand.
+## 6. Acquisition wiring (now scripted — minimal CK glue)
+- **Awakening (milestone):** put **`JJB_Awakening`** on the awakening quest (set `Profile`
+  = the player's `JJB_SoulProfile` alias). Dialogue answers are one-liners:
+  `(GetOwningQuest() as JJB_Awakening).Answer(0..3)`; scene end: `.Finish()`. That's the
+  whole "personality test" — it resolves the archetype and calls `Manager.AwakenPlayer()`.
+- **The Arrow (item):** a one-shot lesser power "Use the Arrow" (Self) whose script
+  MagicEffect carries **`JJB_ArrowEffect`** (`Manager`, `Profile` set). It already runs the
+  Conviction-gated survival check, awakens on success, and routes to
+  `Manager.TryRequiemRitual()` if the user already has a Stand. You just build the item.
 - **Story breakthroughs:** call `Manager.GrantBreakthrough("reason", amount)` from any
   dramatic quest stage.
+
+## 6b. Reach, Time-stop, MCM, Debug (implemented; forms to make)
+| System | Forms / setup | Script |
+|--------|---------------|--------|
+| **Reach / Star Finger** | `JJB_FingerProjectile`, `JJB_FingerSpell`, `JJB_ReachSpell` (carrier) → def `ReachSpell`; install `JJB_StarPlatinum_StarFinger.json` | (in `JJB_StandBondEffect.TryReach`) |
+| **Time-stop** | `JJB_TimeStopCloak` = Fire-and-forget **Self + large Area** spell; its effect uses **`JJB_FrozenEffect`** (set effect Duration = stop length). Def `TimeStopCloak` + `CanTimeStopBrief=true`. | `JJB_FrozenEffect` |
+| **Time-stop camera** (opt) | quest with **`JJB_TimeStopCamera`** → `Manager.Camera`; needs CinematicCamera | `JJB_TimeStopCamera` |
+| **MCM** (opt, SkyUI) | quest (Start Game Enabled) with **`JJB_MCM`**, `Manager` set | `JJB_MCM` |
+| **Debug/test** | already in §5's player alias (**`JJB_DebugAlias`**) — F9/F10/F8/F7 | `JJB_DebugAlias` |
+
+Keybinds (Barrage/Stance/Reach/TimeStop) live on **`JJB_StandManager`** so the MCM can
+rebind them live; the bond effect re-reads them via `RebindKeys()`.
 
 ## 7. NewProjectiles configs
 Copy `../newprojectiles/*.json` into `Data/SKSE/Plugins/NewProjectiles/` and update their

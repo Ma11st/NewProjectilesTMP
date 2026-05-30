@@ -195,14 +195,17 @@ perceive" without per-viewer rendering.
 3. ✅ **StandDef schema** (`capabilities` / mastery deltas / evolution) on `JJB_StandDef` +
    `data/StandDefs.json` v2.
 4. ✅ **Assignment**: `JJB_SoulProfile` counters + awakening-dialogue scoring + archetype map.
-5. ✅ **Acquisition hooks**: `Manager.AwakenPlayer()` + `Manager.TryRequiemRitual()` (the Arrow
-   item/quest + survival check is CK work — see `ck-setup/FORMS.md` §6).
-6. ◑ **Visibility**: `StandSightKeyword` plumbed; the perception/aggressor-reroute behavior is
-   finished in the CK (keyword on ghost ActorBases + AI), plus the optional aura.
+5. ✅ **Acquisition**: `Manager.AwakenPlayer()`, `AwakenPlayerAs()`, `TryRequiemRitual()`,
+   `JJB_Awakening` (dialogue glue), and `JJB_ArrowEffect` (the Arrow's survival check). You
+   build the dialogue/item records; the logic is done.
+6. ✅ **Reach / Star Finger**, **time-stop** (`JJB_FrozenEffect` freeze + optional
+   `JJB_TimeStopCamera`), **NPC reflex** (health-drop), **MCM** (`JJB_MCM`), **debug harness**.
+7. ◑ **Visibility**: `StandSightKeyword` plumbed; the perception/aggressor-reroute is finished
+   in the CK (keyword on ghost ActorBases + AI), plus the optional aura.
 
-**Still ahead:**
-- The **CK build** (`JoJoStands.esp`): def quests, abilities, ghost actors, dialogue, Arrow item.
+**Still ahead (true CK/asset work):**
+- The **CK build** (`JoJoStands.esp`): records, the ghost mesh + attack/idle animations, VO.
 - **ACT** form-switching flow (engine-supported via `NextActDef`, unwired for the SC roster).
-- The World **time-stop**; ghost attack animations; an MCM.
+- The World **full** ZA WARUDO polish; tuning.
 
 ACTs stay built-but-unwired until later Parts are greenlit. Roster stays SC/OVA-only.

@@ -19,11 +19,6 @@ JJB_StandDef     Property DefOverride Auto
 { For NPC users: which Stand this NPC has. Leave None on the player ability;
   the player's def comes from Manager.PlayerDef (set at awakening). }
 
-; DXScancodes. Player only.
-Int Property BarrageKey = 16 Auto   ; Q
-Int Property StanceKey  = 45 Auto   ; X
-Int Property ReachKey   = 33 Auto   ; F
-
 Float Property RegenTickSeconds = 0.5 Auto
 Float Property NpcThinkSeconds  = 0.75 Auto
 
@@ -46,6 +41,7 @@ Float _barrageElapsed = 0.0
 Float _lastSpendTime = 0.0
 Bool  _recovering = false
 Float _resolveLocal = 100.0      ; NPC-only resolve pool
+Float _lastHealth = 0.0          ; NPC-only, for health-drop reflex
 
 ; Effective (Mastery-adjusted) tunables, computed on bond start.
 Float _effParryWindow
@@ -76,9 +72,7 @@ Event OnEffectStart(Actor akTarget, Actor akCaster)
 
     If _isPlayer
         Manager.RegisterPlayerEffect(self)
-        RegisterForKey(BarrageKey)
-        RegisterForKey(StanceKey)
-        RegisterForKey(ReachKey)
+        RebindKeys()
         RegisterForSingleUpdate(RegenTickSeconds)
     Else
         _stance = true                       ; NPCs are always "ready"
@@ -130,21 +124,35 @@ EndFunction
 ;======================================================================
 ; INPUT (player)
 ;======================================================================
+; Re-register the player's hotkeys from the Manager (call after an MCM rebind).
+Function RebindKeys()
+    If !_isPlayer
+        return
+    EndIf
+    UnregisterForAllKeys()
+    RegisterForKey(Manager.BarrageKey)
+    RegisterForKey(Manager.StanceKey)
+    RegisterForKey(Manager.ReachKey)
+    RegisterForKey(Manager.TimeStopKey)
+EndFunction
+
 Event OnKeyDown(Int keyCode)
     If !_def || Utility.IsInMenuMode()
         return
     EndIf
-    If keyCode == StanceKey
+    If keyCode == Manager.StanceKey
         ToggleStance()
-    ElseIf keyCode == BarrageKey
+    ElseIf keyCode == Manager.BarrageKey
         BarrageStart()
-    ElseIf keyCode == ReachKey
-        TryGuard()
+    ElseIf keyCode == Manager.ReachKey
+        TryReach()
+    ElseIf keyCode == Manager.TimeStopKey
+        TryTimeStop()
     EndIf
 EndEvent
 
 Event OnKeyUp(Int keyCode, Float holdTime)
-    If keyCode == BarrageKey
+    If keyCode == Manager.BarrageKey
         BarrageStop()
     EndIf
 EndEvent
@@ -182,16 +190,31 @@ EndEvent
 
 Function NpcThink()
     If !_owner.IsInCombat()
+        _lastHealth = _owner.GetActorValue("Health")
         return
     EndIf
+
+    ; NPC "reflex": magic effects get no OnHit, so detect a big health drop since
+    ; the last think and manifest a guard reactively.
+    Float hp = _owner.GetActorValue("Health")
+    Float drop = _lastHealth - hp
+    _lastHealth = hp
+    If drop >= _owner.GetBaseActorValue("Health") * Manager.ReflexHealthFrac
+        If TryReflex(drop, _owner.GetCombatTarget())
+            return
+        EndIf
+    EndIf
+
     Actor t = _owner.GetCombatTarget()
     If !t
         return
     EndIf
     Float d = _owner.GetDistance(t)
-    ; Close range -> barrage; otherwise hold (guard fires reactively via the hit sensor).
+    ; Close range -> barrage; mid range -> Star Finger reach if available.
     If _def.CanBarrage && d < 220.0 && GetResolve() > _effBarrageCostPerSec
         BarrageStart()
+    ElseIf _def.CanReach && d < _effReachRange && GetResolve() > Manager.CostReach
+        TryReach()
     EndIf
 EndFunction
 
@@ -267,8 +290,63 @@ Bool Function TryGuard()
     return true
 EndFunction
 
+; Reach / Star Finger: one long-range strike (the Stand jabs out and snaps back).
+Bool Function TryReach()
+    If _state != STATE_DORMANT || _recovering || !_def.CanReach
+        return false
+    EndIf
+    If !_stance || GetResolve() < Manager.CostReach
+        return false
+    EndIf
+    SpendResolve(Manager.CostReach)
+    _state = STATE_GUARD                 ; reuses the single-beat manifestation shell
+    Manifest()
+    PlayStandAnim("JJB_Reach")
+    Spell strike = _def.ReachSpell
+    If !strike
+        strike = _def.GuardCounterSpell  ; fall back to the riposte bolt
+    EndIf
+    If strike
+        strike.Cast(_owner, GetTarget())
+    EndIf
+    If _isPlayer
+        Manager.AddMastery(0, 1.0)       ; precision
+    EndIf
+    Utility.Wait(_effParryWindow)
+    Dismiss()
+    _state = STATE_DORMANT
+    StartRecovery()
+    return true
+EndFunction
+
+; Brief time-stop (The World; Star Platinum once unlocked). Casts a cloak that
+; freezes nearby non-users (JJB_FrozenEffect) and, optionally, drives the camera.
+Bool Function TryTimeStop()
+    If !_def.CanTimeStopBrief || !_def.TimeStopCloak
+        return false
+    EndIf
+    If _state != STATE_DORMANT || _recovering
+        return false
+    EndIf
+    ; Players must have unlocked it via Conviction + Mastery (Part-3 canon gate).
+    If _isPlayer
+        If Manager.Conviction.GetValue() < _def.TimeStopConvictionMin
+            return false
+        EndIf
+        Float m = (MasteryLevel(0) + MasteryLevel(1)) / 2.0
+        If m < _def.TimeStopMasteryMin
+            return false
+        EndIf
+    EndIf
+    Manifest()
+    PlayStandAnim("JJB_TimeStop")
+    Manager.DoTimeStop(_owner, _def.TimeStopCloak)
+    Dismiss()
+    return true
+EndFunction
+
 ;======================================================================
-; REFLEX (called by JJB_PlayerHitSensor / an NPC hit sensor)
+; REFLEX (player: via JJB_PlayerHitSensor; NPC: via NpcThink health-drop)
 ;======================================================================
 Bool Function TryReflex(Float incomingDamage, Actor attacker)
     If _state != STATE_DORMANT || _recovering

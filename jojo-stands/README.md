@@ -16,6 +16,7 @@ FormID — every game form is a script property you fill in the CK.
 |------|------------|
 | [`DESIGN.md`](DESIGN.md) | The design bible: the "Flicker" state machine, the four action windows, the Resolve economy, the roster. **Read this first.** |
 | [`PROGRESSION.md`](PROGRESSION.md) | The RPG layer (design): acquisition (milestone + Arrow), the three growth layers (Resolve/Mastery/Conviction), the four evolution modes (Mastery/ACT/Requiem/sub-abilities), Stand assignment, enemy users, visibility, OVA guardrails. |
+| [`BUILD.md`](BUILD.md) | **Build & test guide.** A fast ~10-min test path to see Star Platinum working, the full build, and a property-values appendix. Start here when you open the CK. |
 | `scripts/source/*.psc` | Papyrus that implements the system. |
 | `newprojectiles/*.json` | Barrage / ranged volleys for the [NewProjectiles](../README.md) engine. Validated against the repo `schema.json`. |
 | `data/StandDefs.json` | Data-driven Stand registry (extension point). |
@@ -55,6 +56,12 @@ Papyrus only owns the *when* (the manifestation window + Resolve).
 | `JJB_PlayerHitSensor` (ReferenceAlias) | Routes heavy incoming hits to the player's bond effect for a Reflex save. |
 | `JJB_SoulProfile` (ReferenceAlias) | Playstyle + awakening-dialogue scoring → archetype → which Stand you get. |
 | `JJB_Trials` (ReferenceAlias) | Turns bravery moments (clutch survival, outnumbered) into Conviction. |
+| `JJB_Awakening` (Quest) | Drives the awakening scene; one-liner hooks for dialogue answers. |
+| `JJB_ArrowEffect` (ActiveMagicEffect) | The Stand Arrow: survival check → awaken, or Requiem if already a user. |
+| `JJB_FrozenEffect` (ActiveMagicEffect) | Time-stop freeze applied to caught non-users. |
+| `JJB_TimeStopCamera` (Quest, optional) | The only script that touches CinematicCamera. |
+| `JJB_MCM` (Quest, optional) | SkyUI menu: status, live tuning, key rebinding, debug buttons. |
+| `JJB_DebugAlias` (ReferenceAlias) | Test hotkeys (awaken/refill/conviction/mastery). |
 
 > **Per-actor refactor:** the old singleton `JJB_StandController` is gone — its logic now
 > lives on `JJB_StandBondEffect` so any actor can be a Stand user. See `PROGRESSION.md` §5.
@@ -65,14 +72,20 @@ Papyrus only owns the *when* (the manifestation window + Resolve).
 |-----|--------|
 | `X` | Toggle **Stand-Stance** (intent only — does **not** make the Stand visible) |
 | `Q` (hold) | **Barrage** rush while in stance |
-| `F` | **Reach / parry** flicker |
+| `F` | **Reach / Star Finger** — one long strike |
+| `R` | **Time-Stop** (only if the Stand can, and you've unlocked it) |
 | — (automatic) | **Reflex** save when you take a heavy hit and have Resolve |
+
+Keybinds live on `JJB_StandManager` and are rebindable live in the **MCM** (SkyUI).
+Debug/test hotkeys (`JJB_DebugAlias`): **F9** awaken · **F10** refill Resolve · **F8** +Conviction · **F7** max Mastery.
 
 ## Dependencies
 
 - **NewProjectiles** (this repo) — required, drives the volleys.
 - **SKSE64** — required (key input / timing).
-- **CinematicCamera** (the uploaded DLL) — optional, only for The World's time-stop finisher.
+- **SkyUI** — optional, only for the `JJB_MCM` menu.
+- **CinematicCamera** (the uploaded DLL) — optional, only for the time-stop camera.
+- **powerofthree's Papyrus Extender** — optional, only for a harder time-stop AI freeze.
 - A power-meter HUD pointed at the `Resolve` global — optional.
 
 ## Status (beta)
@@ -81,10 +94,11 @@ Papyrus only owns the *when* (the manifestation window + Resolve).
 - ✅ Star Platinum barrage + Hierophant Green ranged volley (NewProjectiles JSON, schema-valid).
 - ✅ Data-driven registry + capability/mastery/evolution schema (`data/StandDefs.json`).
 - ✅ RPG layer **designed** (`PROGRESSION.md`): acquisition, growth, evolution, assignment, visibility.
-- ✅ RPG layer **implemented (Papyrus)**: per-actor refactor (enemy users possible), Resolve/Mastery/Conviction, capability gating, soul-profile assignment + awakening, Trials → breakthroughs, Requiem ritual hook.
-- ⬜ CK build of `JoJoStands.esp` (def quests, abilities, ghost actors, dialogue, Arrow item) — see `ck-setup/FORMS.md`.
-- ⬜ ACT form-switching UI/flow (engine supported, unwired for the SC roster).
-- ⬜ The World **time-stop** (designed, shipped disabled).
+- ✅ RPG layer **implemented (Papyrus)**: per-actor refactor (enemy users possible), Resolve/Mastery/Conviction, capability gating, soul-profile assignment + awakening, Trials → breakthroughs, Requiem ritual.
+- ✅ Reach/Star Finger, **time-stop** (freeze + optional camera), the **Arrow** item, awakening dialogue glue, **NPC reflex**, **MCM** (SkyUI), and a **debug/test harness**.
+- ✅ **Test path**: see [`BUILD.md`](BUILD.md) §A — ~10 min of CK to punch in-game.
+- ⬜ CK build of `JoJoStands.esp` (records, ghost mesh + animations, dialogue VO) — `ck-setup/FORMS.md` + `BUILD.md`.
+- ⬜ ACT form-switching flow (engine-supported via `NextActDef`, unwired for the SC roster).
 - ⬜ Behavior-graph attack animations for the ghost (you supply / remap anim events).
 - ⬜ MCM for live tuning.
 - ⬜ Multiple-Stand NPC users (unblocked by the per-actor refactor).

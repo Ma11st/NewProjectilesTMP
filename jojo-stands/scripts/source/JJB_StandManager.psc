@@ -57,6 +57,12 @@ Float Property OffsetForward       = 70.0  Auto
 Float Property OffsetRight         = 35.0  Auto
 Float Property OffsetUp            = 0.0   Auto
 
+; Player keybinds (DXScancodes). Authoritative here so the MCM can rebind live.
+Int Property BarrageKey = 16 Auto   ; Q
+Int Property StanceKey  = 45 Auto   ; X
+Int Property ReachKey   = 33 Auto   ; F
+Int Property TimeStopKey = 19 Auto  ; R (only fires if the Stand can time-stop)
+
 ;======================================================================
 ; PLAYER LONG-TERM PROGRESSION
 ;======================================================================
@@ -189,4 +195,66 @@ Function AwakenPlayer(Int aiArchetype)
         Game.GetPlayer().AddSpell(StandBondAbility, false)
     EndIf
     Debug.Notification("Your Stand awakens: " + def.DisplayName)
+EndFunction
+
+; Debug / scripted: awaken a specific Stand by id regardless of archetype.
+Function AwakenPlayerAs(String asStandId)
+    JJB_StandDef def = GetDefById(asStandId)
+    If !def
+        return
+    EndIf
+    PlayerDef = def
+    _awakened = true
+    If Resolve
+        Resolve.SetValue(ResolveMax)
+    EndIf
+    If StandBondAbility && !Game.GetPlayer().HasSpell(StandBondAbility)
+        Game.GetPlayer().AddSpell(StandBondAbility, false)
+    EndIf
+    Debug.Notification("Your Stand awakens: " + def.DisplayName)
+EndFunction
+
+;======================================================================
+; THE ARROW (survival check) -- used by JJB_ArrowEffect
+;======================================================================
+Float Property ArrowBaseSurvival   = 0.10 Auto  ; 10% at zero Conviction (most die)
+Float Property ArrowConvictionScale = 0.009 Auto ; +0.9% survival per Conviction point
+
+Bool Function ArrowSurvives()
+    Float chance = ArrowBaseSurvival
+    If Conviction
+        chance += Conviction.GetValue() * ArrowConvictionScale
+    EndIf
+    If chance > 0.95
+        chance = 0.95
+    EndIf
+    return Utility.RandomFloat(0.0, 1.0) <= chance
+EndFunction
+
+;======================================================================
+; TIME-STOP (brief) -- casts the def's freeze cloak; optional camera
+;======================================================================
+Float Property TimeStopDuration = 5.0 Auto
+String Property TimeStopCameraPath = "Data/SKSE/Plugins/CinematicCamera/DemoPath" Auto
+JJB_TimeStopCamera Property Camera Auto
+{ Optional. If set (and CinematicCamera is installed), drives the camera during the stop. }
+
+Function DoTimeStop(Actor akCaster, Spell akCloak)
+    If !akCaster || !akCloak
+        return
+    EndIf
+    ; akCloak is a fire-and-forget Self spell with a large Area; its JJB_FrozenEffect
+    ; thus applies to every non-caster actor in range for its (CK-set) duration.
+    akCloak.Cast(akCaster, akCaster)
+    Debug.Notification("Toki yo tomare! Time has stopped.")
+    If Camera
+        Camera.Begin(TimeStopCameraPath)
+    EndIf
+EndFunction
+
+; Called by JJB_FrozenEffect on the LAST frozen actor, or by a timer, to end the stop.
+Function EndTimeStop()
+    If Camera
+        Camera.End()
+    EndIf
 EndFunction

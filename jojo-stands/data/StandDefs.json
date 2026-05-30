@@ -28,13 +28,18 @@
       },
 
       "barrageConfig": "newprojectiles/JJB_StarPlatinum_Barrage.json",
+      "reachConfig": "newprojectiles/JJB_StarPlatinum_StarFinger.json",
       "forms": {
         "barrageSpell":      "JoJoStands.esp|0x000D62",
         "punchProjectile":   "JoJoStands.esp|0x000D63",
         "punchSpell":        "JoJoStands.esp|0x000D64",
         "guardCounterSpell": "JoJoStands.esp|0x000D65",
         "reflexNegateSpell": "JoJoStands.esp|0x000D66",
-        "standActorBase":    "JoJoStands.esp|0x000D60"
+        "standActorBase":    "JoJoStands.esp|0x000D60",
+        "reachSpell":        "JoJoStands.esp|0x000D67",
+        "fingerProjectile":  "JoJoStands.esp|0x000D68",
+        "fingerSpell":       "JoJoStands.esp|0x000D69",
+        "timeStopCloak":     "JoJoStands.esp|0x000D6A"
       },
 
       "mastery": {

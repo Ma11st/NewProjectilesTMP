@@ -24,8 +24,10 @@ Bool Property CanTimeStopBrief = false Auto
 ActorBase    Property StandActorBase    Auto  ; the ghost body spawned per user
 Spell        Property BarrageSpell       Auto  ; hidden, cast each barrage tick
 Spell        Property RangedSpell        Auto  ; ranged volley (Emerald Splash etc.)
+Spell        Property ReachSpell         Auto  ; single long strike (Star Finger)
 Spell        Property GuardCounterSpell  Auto
 Spell        Property ReflexNegateSpell  Auto
+Spell        Property TimeStopCloak      Auto  ; cloak that freezes nearby non-users (The World / SP)
 EffectShader Property ManifestShader     Auto
 EffectShader Property DismissShader      Auto
 
